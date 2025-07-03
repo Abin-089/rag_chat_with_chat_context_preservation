@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PDF Chatbot</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>PDF Q&A Chatbot</h1>
+    <form id="upload-form" enctype="multipart/form-data">
+      <input type="file" name="pdf_file" accept="application/pdf" required />
+      <button type="submit">Upload PDF</button>
+    </form>
+
+    <div id="chat-box">
+      <div id="messages"></div>
+      <form id="chat-form">
+        <input type="text" id="question" placeholder="Ask a question..." required />
+        <button type="submit">Send</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const uploadForm = document.getElementById('upload-form');
+    const chatForm = document.getElementById('chat-form');
+    const messages = document.getElementById('messages');
+
+    uploadForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(uploadForm);
+      const response = await fetch('/upload', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await response.json();
+      alert(data.message);
+    });
+
+    chatForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const questionInput = document.getElementById('question');
+      const question = questionInput.value;
+      messages.innerHTML += `<div class="user-msg"><strong>You:</strong> ${question}</div>`;
+      questionInput.value = '';
+
+      const response = await fetch('/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question })
+      });
+      const data = await response.json();
+      messages.innerHTML += `<div class="bot-msg"><strong>Bot:</strong> ${data.answer}</div>`;
+    });
+  </script>
+</body>
+</html>
